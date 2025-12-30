@@ -17,7 +17,7 @@
         .hidden { display: none !important; visibility: hidden !important; opacity: 0 !important; }
         :root { --primary: #009688; --primary-dark: #004d40; --warning: #f59e0b; --danger: #ef4444; --bg-gradient: linear-gradient(135deg, #e0f2f1 0%, #f0fdf4 100%); --text-main: #0f172a; --text-sub: #475569; --bottom-nav-height: 90px; }
         
-        /* ⚡ TURBO DOKUNMA SİSTEMİ: Tüm elementlerde gecikmeyi kaldırır */
+        /* ⚡ TURBO DOKUNMA SİSTEMİ */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         
         input, textarea { user-select: text !important; }
@@ -51,15 +51,9 @@
         
         /* --- POMODORO & SAYAÇ --- */
         .timer-display { font-size: 4.5rem; font-weight: 800; text-align: center; color: var(--primary); margin: 20px 0; line-height: 1; }
+        /* Bilgisayar ve Tablet için Yazı Boyutu */
+        .text-mode-timer { font-size: 2.2rem !important; line-height: 1.2; margin: 10px 0; word-wrap: break-word; }
         
-        /* DÜZELTME: Bilgisayar modunda da "RAKİP BEKLENİYOR" yazısını küçült */
-        .text-mode-timer { 
-            font-size: 2.2rem !important; /* Normalde 4.5rem olan boyutu 2.2rem'e çek */
-            line-height: 1.2;
-            margin: 10px 0;
-            word-wrap: break-word;
-        }
-
         .pomo-controls { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
         .btn-pomo { padding: 15px 30px; border-radius: 16px; font-weight: 700; color: white; flex: 1; min-width: 120px; }
         .btn-timer-adj { width: 50px; height: 50px; border-radius: 15px; background: #e0f2f1; color: var(--primary-dark); font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
@@ -95,17 +89,9 @@
         .xp-fill { height: 100%; background: linear-gradient(90deg, #FFD700, #FFA500); width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
         .rank-badge { font-size: 0.75rem; font-weight: 800; color: #fff; background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 12px; margin-left: 6px; }
         
-        /* --- BİLGE BAYKUŞ (GÜÇLENDİRİLDİ: Tıklama Sorunu Çözüldü) --- */
-        .wise-coach-container { 
-            position: fixed; bottom: 100px; right: 10px; z-index: 999; 
-            display: flex; flex-direction: column; align-items: flex-end; 
-            /* KRİTİK: Kapsayıcı tıklamaları engellemez, arkaya geçirir */
-            pointer-events: none; 
-        }
-        .wise-avatar, .coach-bubble {
-            /* Sadece bu elementler tıklanabilir */
-            pointer-events: auto; 
-        }
+        /* --- BİLGE BAYKUŞ --- */
+        .wise-coach-container { position: fixed; bottom: 100px; right: 10px; z-index: 999; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; }
+        .wise-avatar, .coach-bubble { pointer-events: auto; }
         .wise-avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #4f46e5, #9333ea); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4); cursor: pointer; border: 3px solid #fff; position: relative; transition: transform 0.3s; }
         .coach-badge { position: absolute; top: 0; right: 0; background: #ef4444; color: white; font-size: 0.75rem; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; animation: pulseBadge 2s infinite; }
         .coach-bubble { background: white; padding: 15px 25px 15px 15px; border-radius: 20px 20px 4px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-bottom: 10px; max-width: 250px; font-size: 0.9rem; color: var(--text-main); border: 2px solid #e0e7ff; opacity: 0; transform: translateY(20px) scale(0.9); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; position: absolute; bottom: 75px; right: 0; width: max-content; font-weight: 700; z-index: 1000; cursor: pointer; position: relative; }
@@ -116,65 +102,27 @@
         .points-table { width:100%; border-collapse: collapse; margin-top:10px; font-size:0.85rem;} .points-table td { padding:8px; border-bottom:1px solid #eee; }
         .swal2-container { z-index: 10000 !important; }
 
-        /* --- MOBİL UYUMLULUK (RESPONSIVE) ZIRHI - TAM KORUMA --- */
+        /* --- MOBİL UYUMLULUK (RESPONSIVE) ZIRHI --- */
         @media (max-width: 480px) {
-            body { 
-                padding: 10px; 
-                padding-bottom: 130px; /* En alttaki Hakan butonu için güvenli bölge */
-            }
-
-            /* --- GENEL DOKUNMA HASSASİYETİ (Parmak Dostu) --- */
-            button, .btn-action, .chip-modern, .nav-item, .store-card, input, select {
-                min-height: 48px; /* İdeal dokunma hedefi yüksekliği */
-                touch-action: manipulation; 
-            }
-
-            /* Mağaza Butonlarını Güçlendir */
-            .btn-store {
-                padding: 15px !important; 
-                font-size: 1rem !important;
-                background: #e2e8f0; 
-                color: var(--text-main);
-                z-index: 10; 
-                position: relative;
-                font-weight: 800;
-            }
-
-            /* Seçim Kutucukları (Chips) */
-            .chip-modern {
-                padding: 12px 18px; 
-                margin: 4px;
-                font-size: 0.95rem;
-                flex: 1 1 auto; /* Kutucukları ekrana yay */
-                text-align: center;
-            }
-
+            body { padding: 10px; padding-bottom: 130px; }
+            button, .btn-action, .chip-modern, .nav-item, .store-card, input, select { min-height: 48px; touch-action: manipulation; }
+            .btn-store { padding: 15px !important; font-size: 1rem !important; background: #e2e8f0; color: var(--text-main); z-index: 10; position: relative; font-weight: 800; }
+            .chip-modern { padding: 12px 18px; margin: 4px; font-size: 0.95rem; flex: 1 1 auto; text-align: center; }
             .container { width: 100%; }
             .card { padding: 20px 15px; border-radius: 25px; margin-bottom: 15px; }
-            
-            /* --- YAZI BOYUTU DÜZELTMELERİ --- */
             h2 { font-size: 1.4rem; }
             #userAvatar { font-size: 2.2rem !important; margin-right: 10px !important; }
             #stName { font-size: 1.1rem !important; }
             
-            /* "RAKİP BEKLENİYOR" DÜZELTMESİ (Telefonda daha da küçük) */
+            /* DÜZELTME: Telefon Modunda Yazı Boyutu */
             .timer-display { font-size: 3rem; margin: 15px 0 !important; }
-            .text-mode-timer { 
-                font-size: 1.5rem !important; /* Mobilde iyice küçült */
-                line-height: 1.2; 
-                margin: 10px 0; 
-                word-wrap: break-word; 
-            }
+            .text-mode-timer { font-size: 1.5rem !important; line-height: 1.2; margin: 10px 0; word-wrap: break-word; }
             
-            /* Alt Menü Düzeni (Sıkışıklığı Giderir) */
             .mobile-bottom-nav { justify-content: space-between; padding: 0 5px; height: 80px; }
             .nav-item { min-width: auto; flex: 1; padding: 5px 0; }
             .nav-icon { font-size: 1.5rem; margin-bottom: 2px; }
             .nav-item span { font-size: 0.65rem; display: block; font-weight: 600; }
-            
             .modal-content { padding: 25px 20px; width: 95%; max-height: 85vh; }
-            
-            /* Mağaza Izgarası */
             .store-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
             .store-card { padding: 15px 5px; }
         }
@@ -455,7 +403,7 @@
         </div>
     </div>
     
-    <div id="modalProfile" class="modal hidden fade-in"><div class="modal-content"><h3>Profil</h3><input type="text" id="editProfileName" class="input-modern"><button class="btn-action" onclick="saveUserProfile()" style="margin-top:10px;">Kaydet</button><button onclick="handleLogout()" style="margin-top:10px; width:100%; padding:10px; background:#fee2e2; color:red; border-radius:10px;">ÇIKIŞ YAP</button><button onclick="document.getElementById('modalProfile').classList.add('hidden')" style="margin-top:10px; width:100%; padding:10px;">Kapat</button></div></div>
+    <div id="modalProfile" class="modal hidden fade-in"><div class="modal-content"><h3>Profil Düzenle</h3><div style="background:#fff7ed; color:#c2410c; padding:10px; border-radius:10px; font-size:0.85rem; margin-bottom:10px; border:1px solid #ffedd5;">⚠️ <strong>Bilgi:</strong> İsim değişikliği Hakan'ın onayından sonra geçerli olur.</div><input type="text" id="editProfileName" class="input-modern" placeholder="Yeni Ad Soyad"><button class="btn-action" onclick="saveUserProfile()" style="margin-top:10px;">DEĞİŞİKLİK İSTEĞİ GÖNDER 📩</button><button onclick="handleLogout()" style="margin-top:10px; width:100%; padding:10px; background:#fee2e2; color:red; border-radius:10px;">ÇIKIŞ YAP</button><button onclick="document.getElementById('modalProfile').classList.add('hidden')" style="margin-top:10px; width:100%; padding:10px;">Kapat</button></div></div>
 </div>
 
 <script type="module">
@@ -491,28 +439,89 @@
 
     onAuthStateChanged(auth, async(user)=>{
         if(user){
+            // Admin Check
             if(user.email === ADMIN_EMAIL){ 
                 await signOut(auth);
                 Swal.fire("Yasak Bölge", "Hakanım, burası Alplerin meydanıdır. Lütfen Yönetici Kapısından giriniz.", "error");
                 return; 
             }
-            currentUser=user; 
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-            document.getElementById('wiseCoachContainer').style.display = 'flex';
-            document.getElementById('stName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'Öğrenci';
-            
-            // --- OTO DÜZELTME & BAŞLATMA ---
-            await forceRepairUserData(user.uid);
-            await initStudent(user.uid);
+
+            // GÜVENLİK VE ONAY KONTROLÜ
+            try {
+                const userRef = doc(db, "users", user.uid);
+                const snap = await getDoc(userRef);
+
+                if(snap.exists()) {
+                    const data = snap.data();
+                    
+                    // KURAL: Eğer isApproved === true DEĞİLSE (false veya undefined)
+                    // Kullanıcıyı içeri alma.
+                    if(data.isApproved !== true) {
+                        await signOut(auth);
+                        
+                        let msgTitle = "Onay Bekleniyor 🛡️";
+                        let msgText = "Üyeliğin henüz Hakan tarafından onaylanmadı. Otağa girmek için sabırla beklemen gerekiyor.";
+                        
+                        // Eğer askıya alınmışsa (isApproved: false ve daha önce girmişse vs.)
+                        if(data.isApproved === false) {
+                            msgText = "Üyeliğin onay sürecinde veya askıya alınmış olabilir. Lütfen Hakan ile iletişime geç.";
+                        }
+                        // Eğer eski üye ise (isApproved undefined)
+                        else if(data.isApproved === undefined) {
+                            // Onları da onay listesine düşürmek için veritabanında güncelleme yapmıyoruz
+                            // Sadece girişlerini engelliyoruz. Admin panelinde görünecekler.
+                            msgText = "Sistem güncellendi! Güvenlik gereği hesabın Hakan'ın onayına sunuldu. Onaylandığında tekrar giriş yapabileceksin.";
+                        }
+
+                        Swal.fire({
+                            title: msgTitle,
+                            text: msgText,
+                            icon: "info",
+                            confirmButtonText: "Anlaşıldı",
+                            allowOutsideClick: false
+                        });
+                        return;
+                    }
+                } else {
+                    // Doküman yoksa oluştur (Eski usül, ama isApproved: false ile)
+                    await setDoc(userRef, { 
+                        email: user.email, 
+                        displayName: user.displayName, 
+                        totalMinutes: 0, xp: 0, gold: 0, weeklyGoal: 1000, 
+                        avatar: '🎓', createdAt: serverTimestamp(), streak: 0,
+                        isApproved: false // Varsayılan kapalı
+                    });
+                    await signOut(auth);
+                    Swal.fire("Kayıt Oluşturuldu", "Hesabın incelemeye alındı. Onaylanınca giriş yapabilirsin.", "info");
+                    return;
+                }
+                
+                // --- KAPI AÇILDI ---
+                currentUser=user; 
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('dashboardScreen').classList.remove('hidden');
+                document.getElementById('wiseCoachContainer').style.display = 'flex';
+                document.getElementById('stName').innerText = user.displayName ? user.displayName.split(' ')[0] : 'Öğrenci';
+                
+                await forceRepairUserData(user.uid);
+                await initStudent(user.uid);
+
+            } catch (error) {
+                console.error("Giriş Hatası:", error);
+                await signOut(auth);
+                Swal.fire("Sistem Hatası", "Giriş yapılırken bir sorun oluştu. İnternetini kontrol et.", "error");
+            }
+
         } else {
             currentUser=null;
             document.getElementById('dashboardScreen').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
+            // Butonu sıfırla
+            const btn = document.getElementById('authBtn');
+            if(btn) { btn.innerText = "GİRİŞ YAP"; btn.disabled = false; }
         }
     });
 
-    // --- YENİ: VERİ TİPİ TAMİRCİSİ (HATA KORUMASI) ---
     async function forceRepairUserData(uid) {
         try {
             const userRef = doc(db, "users", uid);
@@ -520,31 +529,87 @@
             if(snap.exists()) {
                 const data = snap.data();
                 const updates = {};
-                // Eğer XP veya Gold "String" olarak kalmışsa, sayıya çevir
                 if(typeof data.xp === 'string') updates.xp = parseInt(data.xp, 10) || 0;
                 if(typeof data.gold === 'string') updates.gold = parseInt(data.gold, 10) || 0;
                 if(typeof data.totalMinutes === 'string') updates.totalMinutes = parseInt(data.totalMinutes, 10) || 0;
                 
                 if(Object.keys(updates).length > 0) {
                     await updateDoc(userRef, updates);
-                    console.log("Veri tipleri düzeltildi:", updates);
                 }
             }
         } catch(e) { console.error("Tamir hatası:", e); }
     }
 
     window.switchAuthMode = (login) => { isLogin = login; document.getElementById('authBtn').innerText = isLogin ? "GİRİŞ YAP" : "KAYIT OL"; document.getElementById('regName').classList.toggle('hidden', isLogin); document.getElementById('tabLogin').classList.toggle('active', isLogin); document.getElementById('tabRegister').classList.toggle('active', !isLogin); document.getElementById('authDesc').innerText = isLogin ? "Maceraya devam etmek için giriş yap." : "Yeni bir efsane doğuyor. Otağımıza katıl."; };
-    window.handleLogin = async () => { const btn = document.getElementById('authBtn'); btn.innerText = "İşleniyor..."; btn.disabled = true; const e = document.getElementById('email').value; const p = document.getElementById('password').value; try{ if(isLogin) await signInWithEmailAndPassword(auth,e,p); else { const n = document.getElementById('regName').value; if(!n) throw new Error("İsim gerekli"); const c = await createUserWithEmailAndPassword(auth,e,p); await updateProfile(c.user,{displayName: n}); } } catch(err){ document.getElementById('authError').style.display='block'; document.getElementById('authError').innerText = "Hata: " + err.message; } finally { btn.innerText = isLogin ? "GİRİŞ YAP" : "KAYIT OL"; btn.disabled = false; } };
+    
+    // --- GÜNCELLENMİŞ KAYIT/GİRİŞ FONKSİYONU ---
+    window.handleLogin = async () => { 
+        const btn = document.getElementById('authBtn'); 
+        btn.innerText = "İşleniyor..."; 
+        btn.disabled = true; 
+        const e = document.getElementById('email').value; 
+        const p = document.getElementById('password').value; 
+        
+        try { 
+            if(isLogin) {
+                // Giriş Yapma
+                await signInWithEmailAndPassword(auth,e,p);
+            } else { 
+                // KAYIT OLMA
+                const n = document.getElementById('regName').value; 
+                if(!n) throw new Error("İsim gerekli"); 
+                
+                const c = await createUserWithEmailAndPassword(auth,e,p); 
+                await updateProfile(c.user,{displayName: n}); 
+                
+                // ONAYSIZ OLARAK KAYDET
+                await setDoc(doc(db, "users", c.user.uid), { 
+                    email: e, 
+                    displayName: n, 
+                    totalMinutes: 0, 
+                    xp: 0, 
+                    gold: 0, 
+                    weeklyGoal: 1000, 
+                    avatar: '🎓', 
+                    createdAt: serverTimestamp(), 
+                    streak: 0,
+                    isApproved: false // YENİ ÜYE ONAYI KAPALI BAŞLAR
+                });
+
+                await signOut(auth);
+                Swal.fire({
+                    title: "Kayıt Başarılı! 📝",
+                    text: "Bilgilerin Hakan'a iletildi. Üyeliğin onaylandığında giriş yapabileceksin.",
+                    icon: "info",
+                    confirmButtonText: "Tamam"
+                });
+                window.switchAuthMode(true);
+            } 
+        } catch(err) { 
+            document.getElementById('authError').style.display='block'; 
+            document.getElementById('authError').innerText = "Hata: " + err.message; 
+        } finally { 
+            btn.innerText = isLogin ? "GİRİŞ YAP" : "KAYIT OL"; 
+            btn.disabled = false; 
+        } 
+    };
+
     window.handleLogout = () => { if(unsubStudentData) unsubStudentData(); signOut(auth); };
 
     async function initStudent(uid){
-        const userRef = doc(db,"users",uid); const userSnap = await getDoc(userRef);
-        if(!userSnap.exists()){ await setDoc(userRef, { email: currentUser.email, displayName: currentUser.displayName, totalMinutes: 0, xp: 0, gold: 0, weeklyGoal: 1000, avatar: '🎓', createdAt: serverTimestamp(), streak: 0 }); }
+        const userRef = doc(db,"users",uid);
         
         onSnapshot(doc(db, "users", uid), async (docSnap) => {
             const data = docSnap.data(); if(!data) return;
             
-            const userXP = parseInt(data.xp) || 0; // Her zaman sayıya çevir
+            // Canlı dinlerken biri onayını çekerse (Askıya alırsa) at
+            if(data.isApproved !== true) {
+                await signOut(auth);
+                location.reload();
+                return;
+            }
+
+            const userXP = parseInt(data.xp) || 0; 
             const userGold = parseInt(data.gold) || 0;
             const userMinutes = parseInt(data.totalMinutes) || 0; 
             
@@ -690,23 +755,20 @@
 
     function updateStudentChart(val, goal){ const ctx = document.getElementById('weeklyChart').getContext('2d'); if(myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Yapılan', 'Kalan'], datasets: [{ data: [val, Math.max(0, goal-val)], backgroundColor: ['#009688', '#e2e8f0'], borderWidth: 0 }] }, options: { cutout: '80%', maintainAspectRatio: false, plugins: { legend: { display: false } } } }); }
     
-    // --- GÜNCELLENMİŞ KAYIT (HIZLI GİRİŞ HATASI ÇÖZÜMÜ) ---
+    // --- GÜNCELLENMİŞ KAYIT ---
     window.saveEntry = async () => { 
         const btn = document.getElementById('btnSaveEntry'); 
         if(btn.disabled) return; 
-
-        // 1. DERS SEÇİMİ KONTROLÜ (Eksikse hata ver)
+        
         const sub = document.getElementById('selectedSubject').value; 
-        if(!sub) return Swal.fire("Eksik Bilgi", "Lütfen yukarıdaki kutucuklardan bir ders seç.", "warning");
-
         const durInput = document.getElementById('entryDur').value;
         const dur = parseInt(durInput, 10); 
         
+        if(!sub) return Swal.fire("Eksik Bilgi", "Lütfen bir ders seç.", "warning");
         if(!dur || isNaN(dur)) return Swal.fire("Hata", "Lütfen geçerli bir süre gir.", "warning");
         if(dur < 10) return Swal.fire("Çok Kısa", "En az 10 dakika girmelisin.", "warning");
 
-        btn.disabled = true; btn.innerText = "Kaydediliyor..."; 
-
+        btn.disabled = true; btn.innerText = "İşleniyor..."; 
         try { 
             const offset = parseInt(document.getElementById('entryDate').value) || 0; 
             const recordDate = new Date(); 
@@ -718,8 +780,8 @@
             if (window.userClanId) { multiplier += 0.5; bonusText = " (Otağ Bonusu Aktif 🔥)"; } 
             
             const points = Math.ceil(dur * multiplier); 
-
-            // Batch kullanarak işlemleri birleştir (Veri tutarlılığı için)
+            
+            // Batch kullanarak işlemleri birleştir
             const batch = writeBatch(db);
             
             const sessionRef = doc(collection(db, "users", currentUser.uid, "sessions"));
@@ -742,18 +804,18 @@
             
             await batch.commit();
 
-            // Otağ puanı güncellemesini ayrıca yap (Hata olursa ana işlem bozulmasın)
+            // Otağ puanı güncellemesi
             if (window.userClanId) {
                 try {
                     await updateDoc(doc(db, "clans", window.userClanId), { totalScore: increment(points) });
-                } catch(e) { console.log("Otağ puanı güncellenemedi:", e); }
+                } catch(e) { console.log("Otağ puanı güncellenemedi (Önemli değil):", e); }
             }
             
             await checkStreakAndAward(currentUser.uid); 
             
-            Swal.fire("Kaydedildi!", `+${points} Puan ${bonusText}`, "success"); 
+            Swal.fire("Kaydedildi!", `+${points} Çalışma Yıldız Puanı${bonusText}`, "success"); 
             confetti(); 
-
+            
             // Formu sıfırla
             document.getElementById('entryDur').value = "40";
             document.getElementById('selectedSubject').value = "";
@@ -761,7 +823,7 @@
 
         } catch(e) { 
             console.error(e);
-            Swal.fire("Hata", "Kayıt başarısız: " + e.message, "error"); 
+            Swal.fire("Hata", "Kayıt hatası: " + e.message, "error"); 
         } finally { 
             setTimeout(() => { btn.disabled = false; btn.innerText = "KAYDET (+Puan) ✅"; }, 1000); 
         } 
@@ -1186,7 +1248,29 @@
     window.readMsg = async(id) => { await updateDoc(doc(db,"messages",id),{read:true}); }; window.openMsgModal = () => document.getElementById('modalMsg').classList.remove('hidden');
     window.changeStudentGoal = async () => { const currentGoal = document.getElementById('targetMins').innerText; const { value: newGoal } = await Swal.fire({ title: 'Haftalık Hedef', input: 'number', inputValue: currentGoal, inputLabel: 'Kaç dakika çalışacaksın?', showCancelButton: true, confirmButtonText: 'Güncelle', inputValidator: (v) => (!v || v < 500) && 'Hedef en az 500 dakika olmalıdır! Daha azı bir Alpe yakışmaz.' }); if (newGoal) { const goalInt = parseInt(newGoal); await updateDoc(doc(db, "users", currentUser.uid), { weeklyGoal: goalInt }); document.getElementById('targetMins').innerText = goalInt; Swal.fire("Hedef Güncellendi", `Yeni hedefin: ${goalInt} dk.`, "success"); } };
     window.switchTab=(t,el)=>{ if(el) { document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(e=>e.classList.remove('active')); el.classList.add('active'); } ['viewHome','viewPomo','viewStore','viewFuture','viewHistory', 'viewArena', 'viewClan', 'viewDesc'].forEach(x=>document.getElementById(x).classList.add('hidden')); document.getElementById('view'+t.charAt(0).toUpperCase()+t.slice(1)).classList.remove('hidden'); if(t === 'arena') listenArena(); if(t === 'clan') { loadClanLeaderboard(); } };
-    window.openProfileModal=()=>{document.getElementById('editProfileName').value=currentUser.displayName||"";document.getElementById('modalProfile').classList.remove('hidden')}; window.saveUserProfile=async()=>{await updateProfile(currentUser,{displayName:document.getElementById('editProfileName').value}); await updateDoc(doc(db,"users",currentUser.uid),{displayName:document.getElementById('editProfileName').value}); location.reload();};
+    
+    // YENİ İSİM DEĞİŞİKLİĞİ FONKSİYONU (ONAY İÇİN BEKLETİR)
+    window.openProfileModal=()=>{document.getElementById('editProfileName').value=currentUser.displayName||"";document.getElementById('modalProfile').classList.remove('hidden')}; 
+    window.saveUserProfile=async()=>{
+        const newName = document.getElementById('editProfileName').value;
+        if(!newName) return Swal.fire("Eksik", "Bir isim girmelisin.", "warning");
+        if(newName === currentUser.displayName) return Swal.fire("Aynı İsim", "Zaten bu ismi kullanıyorsun.", "info");
+
+        try {
+            // İsim değişikliği isteği gönder (pendingDisplayName alanına yaz)
+            await updateDoc(doc(db,"users",currentUser.uid),{
+                pendingDisplayName: newName
+            });
+            Swal.fire({
+                title: "İstek İletildi",
+                text: "İsim değişikliği talebin Hakan'ın onayına sunuldu. Onaylandığında ismin güncellenecek.",
+                icon: "success"
+            });
+            document.getElementById('modalProfile').classList.add('hidden');
+        } catch(e) {
+            Swal.fire("Hata", e.message, "error");
+        }
+    };
     
     document.addEventListener('contextmenu', event => event.preventDefault()); document.onkeydown = function(e) { if(e.keyCode == 123) return false; if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; }
     window.deleteDoc=deleteDoc; window.doc=doc; window.db=db; window.readMsg=window.readMsg; window.openMsgModal=window.openMsgModal;
