@@ -1230,6 +1230,13 @@
                     await forceRepairUserData(user.uid);
                     await initStudent(user.uid);
 
+                    // LOG GİRİŞİ (AI Taraması İçin)
+                    await addDoc(collection(db, "users", user.uid, "auth_logs"), {
+                        loginTime: serverTimestamp(),
+                        userAgent: navigator.userAgent,
+                        platform: navigator.platform
+                    });
+
                 } catch (error) {
                     console.error("Giriş Hatası:", error);
                     await signOut(auth);

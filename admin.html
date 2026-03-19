@@ -505,6 +505,44 @@
                     <h4>📈 GRAFİK (3D)</h4>
                     <div style="height:300px;" id="adminLeaderboardChart"></div>
                 </div>
+
+                <div class="card" style="background: #f8fafc; border: 2px solid #cbd5e1;">
+                    <h4 style="color: #475569;"><i class="fa-solid fa-calendar-days"></i> TARİH ARALIKLI SIRALAMA</h4>
+                    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap: wrap;">
+                        <div style="flex:1; min-width: 140px;">
+                            <label style="font-size: 0.7rem; font-weight: bold; color: #64748b;">BAŞLANGIÇ</label>
+                            <input type="date" id="rankStartDate" class="input-modern" style="margin:0;">
+                        </div>
+                        <div style="flex:1; min-width: 140px;">
+                            <label style="font-size: 0.7rem; font-weight: bold; color: #64748b;">BİTİŞ</label>
+                            <input type="date" id="rankEndDate" class="input-modern" style="margin:0;">
+                        </div>
+                    </div>
+                    <button onclick="calculateRangeRanking()" class="btn-action" style="padding:12px; background:#475569;">SIRALAMAYI HESAPLA 🧮</button>
+                    <div id="rangeRankingResult" class="hidden" style="margin-top:20px;">
+                        <table class="student-table" style="min-width: unset;">
+                            <thead>
+                                <tr>
+                                    <th>SIRA</th>
+                                    <th>ALP</th>
+                                    <th>TOPLAM XP</th>
+                                    <th>SÜRE</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rangeRankingBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #fff8f8; border: 2px solid #fda4af;">
+                    <h4 style="color: #be123c;"><i class="fa-solid fa-robot"></i> AI GÜVENLİK DENETİMİ</h4>
+                    <p style="font-size: 0.85rem; color: #9f1239;">Mantıksız veya şüpheli ders girişlerini yapay zeka ile tara.</p>
+                    <button onclick="runAIDetection()" class="btn-action" style="background:#be123c; padding:12px;">TARAMAYI BAŞLAT 🤖</button>
+                    <div id="aiDetectionResults" class="hidden" style="margin-top:20px;">
+                        <div id="aiResultList" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    </div>
+                </div>
+
                 <div class="card">
                     <h4>👥 LİSTE (SADECE ONAYLILAR)</h4>
                     <div class="table-responsive">
@@ -575,6 +613,8 @@
                             style="background:#d1fae5; color:#065f46;">☀️ Seçilenleri Aç</button>
                         <button onclick="bulkDeleteMembers()" class="btn-smart"
                             style="background:#fee2e2; color:#b91c1c;">🗑️ Seçilenleri Sil</button>
+                        <button onclick="bulkResetScores()" class="btn-smart"
+                            style="background:#fecae6; color:#9d174d;">🔄 Seçilenlerin Puanlarını Sıfırla</button>
                         <button onclick="bulkGiftToSelected()" class="btn-smart"
                             style="background:#fef3c7; color:#b45309;">🎁 Puan Gönder</button>
                     </div>
@@ -1433,6 +1473,173 @@
         window.toggleAllCheckboxes = window.toggleAllCheckboxes;
         window.sendBatchSelection = window.sendBatchSelection;
         window.auditClans = window.auditClans;
+        window.bulkResetScores = async () => {
+            const ids = getSelectedIds('chk-active');
+            if (ids.length === 0) return Swal.fire("Seçim Yok", "Üye seç.", "warning");
+            if (!confirm(`DİKKAT! ${ids.length} üyenin PUAN VE SÜRELERİNİ SIFIRLAMAK üzeresin. Bu işlem geri alınamaz!`)) return;
+            try {
+                const batch = writeBatch(db);
+                for (const id of ids) {
+                    const uRef = doc(db, 'users', id);
+                    batch.update(uRef, { xp: 0, gold: 0, totalMinutes: 0 });
+                    // Opsiyonel: Klan puanından da düşmek gerekir ama klan audit'i zaten bunu toplu yapar. 
+                    // Ancak burada üye bazlı yapıyoruz, isterseniz klanı da bulup update edebiliriz.
+                }
+                await batch.commit();
+                Swal.fire("Sıfırlandı", "Seçilenlerin puanları temizlendi. '⛺ Otağ -> Denetle' yaparak klan puanlarını da eşitleyebilirsin.", "success");
+            } catch (e) { Swal.fire("Hata", e.message, "error"); }
+        };
+
+        window.calculateRangeRanking = async () => {
+            const startStr = document.getElementById('rankStartDate').value;
+            const endStr = document.getElementById('rankEndDate').value;
+            if (!startStr || !endStr) return Swal.fire("Hata", "Tarihleri seçmelisin.", "warning");
+
+            const start = new Date(startStr);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(endStr);
+            end.setHours(23, 59, 59, 999);
+
+            const btn = document.querySelector('button[onclick="calculateRangeRanking()"]');
+            btn.innerText = "Hesaplanıyor... ⏳";
+            btn.disabled = true;
+
+            try {
+                // Cross-user session query
+                const q = query(collectionGroup(db, 'sessions'), where('createdAt', '>=', start), where('createdAt', '<=', end));
+                const snap = await getDocs(q);
+                
+                const stats = {}; // { uid: { xp: 0, mins: 0, name: '' } }
+                
+                snap.forEach(d => {
+                    const s = d.data();
+                    const pathParts = d.ref.path.split('/'); // users/UID/sessions/SID
+                    const uid = pathParts[1];
+                    if (!stats[uid]) stats[uid] = { xp: 0, mins: 0, name: 'Bilinmeyen' };
+                    stats[uid].xp += (s.points || 0);
+                    stats[uid].mins += (s.duration || 0);
+                });
+
+                // Get Names from globalActiveList or users collection if not in list
+                for (const uid in stats) {
+                    const foundInList = globalActiveList.find(x => x.id === uid);
+                    if (foundInList) {
+                        stats[uid].name = foundInList.displayName;
+                    } else {
+                        const uDoc = await getDoc(doc(db, "users", uid));
+                        if (uDoc.exists()) stats[uid].name = uDoc.data().displayName;
+                    }
+                }
+
+                const sorted = Object.entries(stats).map(([id, val]) => ({ id, ...val })).sort((a,b) => b.xp - a.xp);
+                const body = document.getElementById('rangeRankingBody');
+                body.innerHTML = "";
+                if (sorted.length === 0) {
+                    body.innerHTML = "<tr><td colspan='4' style='text-align:center;'>Bu tarihler arasında kayıt bulunamadı.</td></tr>";
+                } else {
+                    sorted.forEach((item, idx) => {
+                        body.innerHTML += `<tr>
+                            <td style="font-weight:bold; color:#64748b;">#${idx+1}</td>
+                            <td style="font-weight:700;">${item.name}</td>
+                            <td style="color:#6366f1; font-weight:800;">${item.xp} ✨</td>
+                            <td>${Math.floor(item.mins / 60)}s ${item.mins % 60}dk</td>
+                        </tr>`;
+                    });
+                }
+                document.getElementById('rangeRankingResult').classList.remove('hidden');
+            } catch (e) {
+                console.error(e);
+                Swal.fire("Sistem Hatası", "Veriler çekilemedi. Dizin (Index) eksik olabilir. Tarayıcı konsoluna bak.", "error");
+            } finally {
+                btn.innerText = "SIRALAMAYI HESAPLA 🧮";
+                btn.disabled = false;
+            }
+        };
+
+        window.runAIDetection = async () => {
+            const btn = document.querySelector('button[onclick="runAIDetection()"]');
+            btn.innerText = "AI Denetliyor... 🤖";
+            btn.disabled = true;
+            const resDiv = document.getElementById('aiDetectionResults');
+            const list = document.getElementById('aiResultList');
+            resDiv.classList.remove('hidden');
+            list.innerHTML = "<div style='text-align:center; padding:10px;'>Ağ taranıyor, mantıksal analiz yapılıyor...</div>";
+
+            try {
+                // Son 7 güne bakalım
+                const lookback = new Date();
+                lookback.setDate(lookback.getDate() - 7);
+
+                const snap = await getDocs(query(collectionGroup(db, 'sessions'), where('createdAt', '>=', lookback)));
+                const allSessions = [];
+                snap.forEach(d => allSessions.push({ id: d.id, path: d.ref.path, ...d.data(), uid: d.ref.path.split('/')[1] }));
+
+                const anomalies = [];
+
+                // 1. Çok uzun seanslar (> 400 dk)
+                allSessions.filter(s => s.duration > 400).forEach(s => {
+                    anomalies.push({ type: 'danger', icon: '⏰', title: 'Aşırı Uzun Süre', desc: `${s.duration} dk tek seferde girilmiş.`, user: s.uid, session: s });
+                });
+
+                // 2. Aynı gün/saat çakışan seanslar (Aynı kullanıcı için)
+                const userBundles = {};
+                allSessions.forEach(s => {
+                    if (!userBundles[s.uid]) userBundles[s.uid] = [];
+                    userBundles[s.uid].push(s);
+                });
+
+                for (const uid in userBundles) {
+                    const uSess = userBundles[uid].sort((a,b) => a.createdAt?.seconds - b.createdAt?.seconds);
+                    for (let i = 0; i < uSess.length - 1; i++) {
+                        const s1 = uSess[i];
+                        const s2 = uSess[i+1];
+                        if (s1.createdAt && s2.createdAt) {
+                            const diff = (s2.createdAt.seconds - s1.createdAt.seconds) / 60;
+                            // Eğer iki seans arası süre, ilk seansın süresinden azsa ÇAKIŞMA vardır.
+                            if (diff < s1.duration && s1.duration > 0 && s1.type !== 'bonus' && s2.type !== 'bonus') {
+                                anomalies.push({ type: 'warning', icon: '🌓', title: 'Zaman Çakışması', desc: `Peş peşe girilen dersler birbiriyle örtüşüyor. (${s1.subject} ve ${s2.subject})`, user: uid, session: s2 });
+                            }
+                        }
+                    }
+                }
+
+                // 3. Çok yüksek puanlı küçük süreler
+                allSessions.filter(s => s.points > 500 && s.duration < 10 && s.type !== 'bonus').forEach(s => {
+                    anomalies.push({ type: 'warning', icon: '💰', title: 'Şüpheli Puan', desc: `${s.duration} dk için ${s.points} Puan verilmiş.`, user: s.uid, session: s });
+                });
+
+                list.innerHTML = "";
+                if (anomalies.length === 0) {
+                    list.innerHTML = "<div style='text-align:center; color:#166534; background:#dcfce7; padding:20px; border-radius:15px; font-weight:bold;'>Yapay zeka herhangi bir mantıksız giriş saptamadı. Alp'ler temiz! ✨</div>";
+                } else {
+                    anomalies.sort((a,b) => (b.session.createdAt?.seconds || 0) - (a.session.createdAt?.seconds || 0)).forEach(a => {
+                        const u = globalActiveList.find(x => x.id === a.user) || { displayName: 'Bilinmeyen' };
+                        const color = a.type === 'danger' ? '#be123c' : '#b45309';
+                        const bg = a.type === 'danger' ? '#fff1f2' : '#fffbeb';
+                        const border = a.type === 'danger' ? '#fecdd3' : '#fcd34d';
+
+                        list.innerHTML += `
+                            <div style="background:${bg}; border:1px solid ${border}; padding:15px; border-radius:15px; display:flex; gap:12px; align-items:center;">
+                                <div style="font-size:1.5rem;">${a.icon}</div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:800; color:${color}; margin-bottom:2px;">${a.title} - ${u.displayName}</div>
+                                    <div style="font-size:0.8rem; color:#475569;">${a.desc}</div>
+                                    <div style="font-size:0.7rem; color:#94a3b8; margin-top:4px;">${formatDateTR(a.session.createdAt)}</div>
+                                </div>
+                                <button onclick="openAdminStudentDetail('${a.user}')" class="btn-smart" style="background:white; border:1px solid ${border}; color:${color};">İncele</button>
+                            </div>
+                        `;
+                    });
+                }
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire("Hata", "Denetim sırasında sorun çıktı.", "error");
+            } finally {
+                btn.innerText = "TARAMAYI BAŞLAT 🤖";
+                btn.disabled = false;
+            }
+        };
 
         // YENİ EKLEMELER
         window.approveNewUser = window.approveNewUser;
