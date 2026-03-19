@@ -1476,18 +1476,35 @@
         window.bulkResetScores = async () => {
             const ids = getSelectedIds('chk-active');
             if (ids.length === 0) return Swal.fire("Seçim Yok", "Üye seç.", "warning");
-            if (!confirm(`DİKKAT! ${ids.length} üyenin PUAN VE SÜRELERİNİ SIFIRLAMAK üzeresin. Bu işlem geri alınamaz!`)) return;
+            if (!confirm(`DİKKAT! ${ids.length} üyenin PUAN, SÜRE VE GEÇMİŞ TÜM KAYITLARINI (DERSLERİNİ) SIFIRLAMAK üzeresin. Bu işlem geri alınamaz!`)) return;
+            
+            const btn = document.querySelector('button[onclick="bulkResetScores()"]');
+            btn.innerText = "Sıfırlanıyor...";
+            btn.disabled = true;
+
             try {
-                const batch = writeBatch(db);
                 for (const id of ids) {
+                    // 1. Önce kullanıcının ana puanlarını sıfırla
                     const uRef = doc(db, 'users', id);
-                    batch.update(uRef, { xp: 0, gold: 0, totalMinutes: 0 });
-                    // Opsiyonel: Klan puanından da düşmek gerekir ama klan audit'i zaten bunu toplu yapar. 
-                    // Ancak burada üye bazlı yapıyoruz, isterseniz klanı da bulup update edebiliriz.
+                    await updateDoc(uRef, { xp: 0, gold: 0, totalMinutes: 0 });
+                    
+                    // 2. Kullanıcının tüm geçmiş ders kayıtlarını (sessions) bul ve sil
+                    // Tarih aralıklı sıralamada eski puanların çıkmaması için bu şart!
+                    const sessSnap = await getDocs(collection(db, "users", id, "sessions"));
+                    if (!sessSnap.empty) {
+                        // Firestore batch limiti 500'dür. Tek öğrencinin 500'den az dersi olduğunu varsayıyoruz. 
+                        const batch = writeBatch(db);
+                        sessSnap.forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                    }
                 }
-                await batch.commit();
-                Swal.fire("Sıfırlandı", "Seçilenlerin puanları temizlendi. '⛺ Otağ -> Denetle' yaparak klan puanlarını da eşitleyebilirsin.", "success");
-            } catch (e) { Swal.fire("Hata", e.message, "error"); }
+                Swal.fire("Sıfırlandı", "Seçilenlerin puanları ve TÜM geçmiş ders kayıtları temizlendi. '⛺ Otağ -> Denetle' yaparak klan puanlarını da eşitleyebilirsin.", "success");
+            } catch (e) {
+                Swal.fire("Hata", e.message, "error");
+            } finally {
+                btn.innerText = "🔄 Seçilenlerin Puanlarını Sıfırla";
+                btn.disabled = false;
+            }
         };
 
         window.calculateRangeRanking = async () => {
